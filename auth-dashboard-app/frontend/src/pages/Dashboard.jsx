@@ -15,6 +15,9 @@ const Dashboard = () => {
   const [bio, setBio] =
     useState("");
 
+  const [profilePic, setProfilePic] =
+    useState(null);
+
   const [editing, setEditing] =
     useState(false);
 
@@ -71,16 +74,27 @@ const Dashboard = () => {
   const handleUpdate = async () => {
     try {
 
+      const formData = new FormData();
+
+      formData.append("name", name);
+      formData.append("phone", phone);
+      formData.append("bio", bio);
+
+      if (profilePic) {
+        formData.append(
+          "profilePic",
+          profilePic
+        );
+      }
+
       const res = await axios.put(
         `${import.meta.env.VITE_API_URL}/api/user/update`,
-        {
-          name,
-          phone,
-          bio,
-        },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "multipart/form-data",
           },
         }
       );
@@ -178,7 +192,7 @@ const Dashboard = () => {
           </h1>
 
           {/* PROFILE IMAGE */}
-          <div className="flex justify-center mb-8">
+          <div className="flex flex-col items-center mb-8 gap-4">
 
             <img
               src={
@@ -189,6 +203,21 @@ const Dashboard = () => {
               alt="profile"
               className="w-36 h-36 rounded-full object-cover border-4 border-white"
             />
+
+            {
+              editing && (
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setProfilePic(
+                      e.target.files[0]
+                    )
+                  }
+                  className="text-sm"
+                />
+              )
+            }
 
           </div>
 

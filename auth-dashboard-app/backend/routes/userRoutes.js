@@ -6,7 +6,16 @@ import ActivityLog from "../models/ActivityLog.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 
+import multer from "multer";
+import cloudinary from "../config/cloudinary.js";
+
 const router = express.Router();
+
+const storage = multer.memoryStorage();
+
+const upload = multer({
+  storage,
+});
 
 
 // GET CURRENT USER
@@ -37,6 +46,7 @@ router.get(
 router.put(
   "/update",
   authMiddleware,
+  upload.single("profilePic"),
   async (req, res) => {
     try {
 
@@ -46,14 +56,40 @@ router.put(
         bio,
       } = req.body;
 
+      let profilePic = "";
+
+      // UPLOAD IMAGE TO CLOUDINARY
+      if (req.file) {
+
+        const base64 =
+          `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+
+        const uploadResponse =
+          await cloudinary.uploader.upload(base64, {
+            folder: "profile_pics",
+          });
+
+        profilePic =
+          uploadResponse.secure_url;
+      }
+
+      const updateData = {
+        name,
+        phone,
+        bio,
+      };
+
+      // ONLY UPDATE IMAGE
+      // IF NEW IMAGE EXISTS
+      if (profilePic) {
+        updateData.profilePic =
+          profilePic;
+      }
+
       const user =
         await User.findByIdAndUpdate(
           req.user.id,
-          {
-            name,
-            phone,
-            bio,
-          },
+          updateData,
           { new: true }
         );
 
@@ -72,6 +108,8 @@ router.put(
       });
 
     } catch (err) {
+
+      console.log(err);
 
       res.status(500).json({
         message: "Update failed",
