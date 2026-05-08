@@ -12,7 +12,11 @@ const Register = () => {
   const [password, setPassword] =
     useState("");
 
+  const [showPassword, setShowPassword] =
+    useState(false);
+
   const handleRegister = async (e) => {
+
     e.preventDefault();
 
     try {
@@ -28,18 +32,23 @@ const Register = () => {
 
       alert("Registration successful");
 
-      window.location.href = "/login";
+      window.location.href =
+        "/login";
 
     } catch (err) {
 
       console.log(err);
 
-      alert("Registration failed");
+      alert(
+        err.response?.data?.message ||
+        "Registration failed"
+      );
 
     }
   };
 
   return (
+
     <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white">
 
       <div className="w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-10 shadow-2xl">
@@ -100,16 +109,40 @@ const Register = () => {
               Password
             </label>
 
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              className="w-full mt-2 bg-white/10 border border-white/10 rounded-xl px-4 py-3 outline-none"
-              required
-            />
+            <div className="relative">
+
+              <input
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                className="w-full mt-2 bg-white/10 border border-white/10 rounded-xl px-4 py-3 outline-none pr-16"
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-blue-400"
+              >
+                {
+                  showPassword
+                    ? "Hide"
+                    : "Show"
+                }
+              </button>
+
+            </div>
 
           </div>
 
@@ -130,7 +163,10 @@ const Register = () => {
 
           <span
             onClick={() =>
-              (window.location.href = "/login")
+              (
+                window.location.href =
+                "/login"
+              )
             }
             className="text-blue-400 cursor-pointer"
           >
@@ -140,7 +176,9 @@ const Register = () => {
         </p>
 
       </div>
+
     </div>
+
   );
 };
 
