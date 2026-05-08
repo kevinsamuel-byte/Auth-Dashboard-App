@@ -165,18 +165,21 @@ const Dashboard = () => {
                 />
               </div>
 
-              <div>
-                <p className="text-xl mb-2">Phone</p>
+             <div>
+  <p className="text-xl mb-2">Phone</p>
 
-                <input
-                  type="text"
-                  value={phone}
-                  onChange={(e) =>
-                    setPhone(e.target.value)
-                  }
-                  className="w-full p-4 rounded-xl bg-[#4b5563] text-white outline-none"
-                />
-              </div>
+  <input
+    type="text"
+    value={phone}
+    maxLength={10}
+    onChange={(e) =>
+      setPhone(
+        e.target.value.replace(/\D/g, "")
+      )
+    }
+    className="w-full p-4 rounded-xl bg-[#4b5563] text-white outline-none"
+  />
+</div>
 
               <div>
                 <p className="text-xl mb-2">Bio</p>

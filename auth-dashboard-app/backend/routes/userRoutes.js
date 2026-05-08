@@ -58,6 +58,17 @@ router.put(
         bio,
       } = req.body;
 
+      // PHONE VALIDATION
+      if (
+        phone &&
+        phone.length !== 10
+      ) {
+        return res.status(400).json({
+          message:
+            "Phone number must be exactly 10 digits",
+        });
+      }
+
       let profilePic = "";
 
       // CHECK FILE
