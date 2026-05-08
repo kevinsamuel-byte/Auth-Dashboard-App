@@ -7,7 +7,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 
 import multer from "multer";
-import cloudinary from "../config/cloudinary.js";
+import { cloudinary, storage } from "../config/cloudinary.js";
 
 const router = express.Router();
 
