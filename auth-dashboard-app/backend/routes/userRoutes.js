@@ -7,14 +7,14 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 
 import multer from "multer";
-import { cloudinary, storage } from "../config/cloudinary.js";
+import { cloudinary } from "../config/cloudinary.js";
 
 const router = express.Router();
 
-const storage = multer.memoryStorage();
 
+// MULTER MEMORY STORAGE
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
 });
 
 
@@ -29,9 +29,11 @@ router.get(
         await User.findById(req.user.id)
           .select("-password");
 
-      res.json({ user });
+      res.json(user);
 
     } catch (err) {
+
+      console.log(err);
 
       res.status(500).json({
         message: "Server error",
@@ -58,6 +60,9 @@ router.put(
 
       let profilePic = "";
 
+      // CHECK FILE
+      console.log(req.file);
+
       // UPLOAD IMAGE TO CLOUDINARY
       if (req.file) {
 
@@ -65,9 +70,12 @@ router.put(
           `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
 
         const uploadResponse =
-          await cloudinary.uploader.upload(base64, {
-            folder: "profile_pics",
-          });
+          await cloudinary.uploader.upload(
+            base64,
+            {
+              folder: "profile_pics",
+            }
+          );
 
         profilePic =
           uploadResponse.secure_url;
@@ -80,7 +88,7 @@ router.put(
       };
 
       // ONLY UPDATE IMAGE
-      // IF NEW IMAGE EXISTS
+      // IF IMAGE EXISTS
       if (profilePic) {
         updateData.profilePic =
           profilePic;
@@ -91,7 +99,7 @@ router.put(
           req.user.id,
           updateData,
           { new: true }
-        );
+        ).select("-password");
 
       // ACTIVITY LOG
       await ActivityLog.create({
@@ -204,6 +212,8 @@ router.get(
 
     } catch (err) {
 
+      console.log(err);
+
       res.status(500).json({
         message: "Failed to fetch users",
       });
@@ -241,6 +251,8 @@ router.delete(
       });
 
     } catch (err) {
+
+      console.log(err);
 
       res.status(500).json({
         message: "Delete failed",
@@ -284,6 +296,8 @@ router.put(
 
     } catch (err) {
 
+      console.log(err);
+
       res.status(500).json({
         message: "Role update failed",
       });
@@ -322,6 +336,8 @@ router.get(
 
     } catch (err) {
 
+      console.log(err);
+
       res.status(500).json({
         message: "Analytics failed",
       });
@@ -347,6 +363,8 @@ router.get(
       res.json(logs);
 
     } catch (err) {
+
+      console.log(err);
 
       res.status(500).json({
         message: "Failed to fetch logs",
