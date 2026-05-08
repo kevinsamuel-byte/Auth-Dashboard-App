@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -9,6 +10,7 @@ const Dashboard = () => {
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
   const [profilePic, setProfilePic] = useState(null);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
@@ -100,9 +102,12 @@ const Dashboard = () => {
               Dashboard
             </p>
 
-            <p className="cursor-pointer hover:text-blue-400">
-              Admin Panel
-            </p>
+            <p
+  onClick={() => navigate("/admin-dashboard")}
+  className="cursor-pointer hover:text-blue-400"
+>
+  Admin Panel
+</p>
           </div>
         </div>
 
