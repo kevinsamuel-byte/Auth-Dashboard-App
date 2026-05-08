@@ -1,35 +1,24 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const Dashboard = () => {
+  const [user, setUser] = useState(null);
+  const [editing, setEditing] = useState(false);
 
-  const [user, setUser] =
-    useState(null);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
+  const [profilePic, setProfilePic] = useState(null);
 
-  const [name, setName] =
-    useState("");
+  const token = localStorage.getItem("token");
 
-  const [phone, setPhone] =
-    useState("");
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
-  const [bio, setBio] =
-    useState("");
-
-  const [profilePic, setProfilePic] =
-    useState(null);
-
-  const [editing, setEditing] =
-    useState(false);
-
-  const token =
-    localStorage.getItem("token");
-
-
-  // FETCH USER
   const fetchUser = async () => {
     try {
-
-      const res = await axios.get(
+      const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/user/me`,
         {
           headers: {
@@ -38,42 +27,18 @@ const Dashboard = () => {
         }
       );
 
-      if (!res.data.user) {
-        console.log("No user found");
-        return;
-      }
+      setUser(response.data);
 
-      setUser(res.data.user);
-
-      setName(
-        res.data.user.name || ""
-      );
-
-      setPhone(
-        res.data.user.phone || ""
-      );
-
-      setBio(
-        res.data.user.bio || ""
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
+      setName(response.data.name || "");
+      setPhone(response.data.phone || "");
+      setBio(response.data.bio || "");
+    } catch (error) {
+      console.log(error);
     }
   };
 
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-
-  // UPDATE PROFILE
   const handleUpdate = async () => {
     try {
-
       const formData = new FormData();
 
       formData.append("name", name);
@@ -81,274 +46,197 @@ const Dashboard = () => {
       formData.append("bio", bio);
 
       if (profilePic) {
-        formData.append(
-          "profilePic",
-          profilePic
-        );
+        formData.append("profilePic", profilePic);
       }
 
-      const res = await axios.put(
+      const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/api/user/update`,
         formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type":
-              "multipart/form-data",
           },
         }
       );
 
-      setUser(res.data.user);
+      setUser(response.data.user);
 
       setEditing(false);
 
-      alert("Profile updated");
+      alert("Profile updated successfully");
+    } catch (error) {
+      console.log(error);
 
-    } catch (err) {
-
-      console.log(err);
-
+      alert(
+        error.response?.data?.message ||
+          "Failed to update profile"
+      );
     }
   };
 
-
-  // LOGOUT
-  const handleLogout = () => {
-
+  const logout = () => {
     localStorage.removeItem("token");
-
     window.location.href = "/login";
-
   };
-
 
   if (!user) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-[#0f172a] text-white">
+      <div className="text-white text-center mt-10">
         Loading...
       </div>
     );
   }
 
-
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white">
-
-      {/* SIDEBAR */}
-      <div className="w-64 bg-black/30 border-r border-white/10 p-6 flex flex-col justify-between">
-
+    <div className="min-h-screen flex bg-gradient-to-r from-[#0f172a] to-[#1e293b] text-white">
+      
+      {/* Sidebar */}
+      <div className="w-64 bg-[#0b1324] p-6 flex flex-col justify-between">
         <div>
+          <h1 className="text-4xl font-bold mb-12">My App</h1>
 
-          <h1 className="text-4xl font-bold mb-12">
-            My App
-          </h1>
-
-          <div className="space-y-6">
-
-            <button
-              className="block text-lg hover:text-blue-400"
-            >
+          <div className="space-y-8 text-3xl">
+            <p className="cursor-pointer hover:text-blue-400">
               Dashboard
-            </button>
+            </p>
 
-            {
-              user.role === "admin" && (
-                <button
-                  onClick={() =>
-                    window.location.href =
-                      "/admin-dashboard"
-                  }
-                  className="block text-lg hover:text-blue-400"
-                >
-                  Admin Panel
-                </button>
-              )
-            }
-
+            <p className="cursor-pointer hover:text-blue-400">
+              Admin Panel
+            </p>
           </div>
-
         </div>
 
-        {/* LOGOUT */}
         <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600 transition py-3 rounded-xl text-lg font-semibold"
+          onClick={logout}
+          className="bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl text-2xl"
         >
           Logout
         </button>
-
       </div>
 
-
-      {/* MAIN CONTENT */}
+      {/* Main */}
       <div className="flex-1 flex justify-center items-center p-10">
-
-        <div className="w-full max-w-lg bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-10 shadow-2xl">
-
-          {/* TITLE */}
-          <h1 className="text-5xl font-bold text-center mb-10">
+        <div className="bg-[#374151] p-10 rounded-3xl shadow-2xl w-full max-w-2xl">
+          
+          <h1 className="text-6xl font-bold text-center mb-10">
             Dashboard
           </h1>
 
-          {/* PROFILE IMAGE */}
-          <div className="flex flex-col items-center mb-8 gap-4">
-
+          {/* Profile Image */}
+          <div className="flex justify-center mb-8">
             <img
               src={
                 user.profilePic
                   ? user.profilePic
-                  : "https://dummyimage.com/150x150/000/fff"
+                  : "https://via.placeholder.com/150"
               }
               alt="profile"
-              className="w-36 h-36 rounded-full object-cover border-4 border-white"
+              className="w-40 h-40 rounded-full border-4 border-white object-cover"
             />
+          </div>
 
-            {
-              editing && (
+          {editing ? (
+            <div className="space-y-6">
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setProfilePic(e.target.files[0])
+                }
+                className="text-sm"
+              />
+
+              <div>
+                <p className="text-xl mb-2">Name</p>
+
                 <input
-                  type="file"
-                  accept="image/*"
+                  type="text"
+                  value={name}
                   onChange={(e) =>
-                    setProfilePic(
-                      e.target.files[0]
-                    )
+                    setName(e.target.value)
                   }
-                  className="text-sm"
+                  className="w-full p-4 rounded-xl bg-[#4b5563] text-white outline-none"
                 />
-              )
-            }
+              </div>
 
-          </div>
+              <div>
+                <p className="text-xl mb-2">Phone</p>
 
-          {/* DETAILS */}
-          <div className="space-y-6">
-
-            {/* NAME */}
-            <div>
-
-              <p className="text-gray-400 mb-2">
-                Name
-              </p>
-
-              {
-                editing ? (
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) =>
-                      setName(e.target.value)
-                    }
-                    className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 outline-none"
-                  />
-                ) : (
-                  <p className="text-2xl font-semibold">
-                    {user.name}
-                  </p>
-                )
-              }
-
-            </div>
-
-
-            {/* EMAIL */}
-            <div>
-
-              <p className="text-gray-400 mb-2">
-                Email
-              </p>
-
-              <p className="text-xl">
-                {user.email}
-              </p>
-
-            </div>
-
-
-            {/* PHONE */}
-            <div>
-
-              <p className="text-gray-400 mb-2">
-                Phone
-              </p>
-
-              {
-                editing ? (
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) =>
-                      setPhone(e.target.value)
-                    }
-                    className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 outline-none"
-                  />
-                ) : (
-                  <p className="text-xl">
-                    {user.phone || "N/A"}
-                  </p>
-                )
-              }
-
-            </div>
-
-
-            {/* BIO */}
-            <div>
-
-              <p className="text-gray-400 mb-2">
-                Bio
-              </p>
-
-              {
-                editing ? (
-                  <textarea
-                    value={bio}
-                    onChange={(e) =>
-                      setBio(e.target.value)
-                    }
-                    className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 outline-none"
-                  />
-                ) : (
-                  <p className="text-lg text-gray-300">
-                    {user.bio || "No bio added"}
-                  </p>
-                )
-              }
-
-            </div>
-
-          </div>
-
-
-          {/* BUTTONS */}
-          <div className="mt-10">
-
-            {
-              editing ? (
-                <button
-                  onClick={handleUpdate}
-                  className="w-full bg-green-500 hover:bg-green-600 transition py-3 rounded-xl text-lg font-semibold"
-                >
-                  Save Changes
-                </button>
-              ) : (
-                <button
-                  onClick={() =>
-                    setEditing(true)
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) =>
+                    setPhone(e.target.value)
                   }
-                  className="w-full bg-blue-500 hover:bg-blue-600 transition py-3 rounded-xl text-lg font-semibold"
-                >
-                  Edit Profile
-                </button>
-              )
-            }
+                  className="w-full p-4 rounded-xl bg-[#4b5563] text-white outline-none"
+                />
+              </div>
 
-          </div>
+              <div>
+                <p className="text-xl mb-2">Bio</p>
 
+                <textarea
+                  value={bio}
+                  onChange={(e) =>
+                    setBio(e.target.value)
+                  }
+                  className="w-full p-4 rounded-xl bg-[#4b5563] text-white outline-none"
+                />
+              </div>
+
+              <button
+                onClick={handleUpdate}
+                className="w-full bg-green-500 hover:bg-green-600 py-4 rounded-xl text-2xl font-semibold"
+              >
+                Save Changes
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-8">
+
+              <div>
+                <p className="text-gray-300 text-xl">Name</p>
+
+                <h2 className="text-4xl font-bold">
+                  {user.name}
+                </h2>
+              </div>
+
+              <div>
+                <p className="text-gray-300 text-xl">Email</p>
+
+                <h2 className="text-3xl">
+                  {user.email}
+                </h2>
+              </div>
+
+              <div>
+                <p className="text-gray-300 text-xl">Phone</p>
+
+                <h2 className="text-3xl">
+                  {user.phone}
+                </h2>
+              </div>
+
+              <div>
+                <p className="text-gray-300 text-xl">Bio</p>
+
+                <h2 className="text-2xl">
+                  {user.bio}
+                </h2>
+              </div>
+
+              <button
+                onClick={() => setEditing(true)}
+                className="w-full bg-blue-500 hover:bg-blue-600 py-4 rounded-xl text-2xl font-semibold"
+              >
+                Edit Profile
+              </button>
+            </div>
+          )}
         </div>
-
       </div>
-
     </div>
   );
 };
